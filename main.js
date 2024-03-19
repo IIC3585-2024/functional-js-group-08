@@ -18,7 +18,7 @@ function isLineHeader(line){
     return false;
 }
 
-function handleLineEnumerate(line){
+function handleLineHeader(line){
     let hashtagCount = 1;
     for (hashtagCount; hashtagCount < line.length; hashtagCount++) {
         if(line[hashtagCount] != "#") break;
@@ -31,7 +31,7 @@ function handleParagraphLine(line){
 }
 
 
-function handleLineHeader(line){
+function handleLineEnumerate(line){
     //TODO
     return false
 }
@@ -45,12 +45,11 @@ function handleReadNextLine(currentLine, ident){
 }
 
 function handleReadFile(lines){
-    let currentLine = lines.shift();
     let result = ""
     while(lines.length>0){
         currentLine = lines.shift();
-        result += "\n";
         result += handleReadNextLine(currentLine, 0)
+        result += "\n";
     }
     fs.writeFile('result.html', result, (err) => {
         if (err) throw err;
