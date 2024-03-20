@@ -5,8 +5,14 @@ function isNumeric(str) {
     return !isNaN(parseFloat(str)) && isFinite(str);
 }
 
+function removeIndentation(str) {
+    return str.replace(/^\s+/g, '');
+}
+
 function isLineEnumerate(line){
-    if(isNumeric(line[0]) && line.substring(1, 3) === ". ") return true;
+    const filteredLine = removeIndentation(line)
+    if(isNumeric(filteredLine[0]) && filteredLine.substring(1, 3) === ". ") return true;
+    return false;
 }
 
 function isLineHeader(line){
@@ -30,25 +36,60 @@ function handleParagraphLine(line){
     return `<p> ${line} </p>`
 }
 
-
-function handleLineEnumerate(line){
-    //TODO
-    return false
+function countIndentation(str) {
+    let count = 0;
+    for (let i = 0; i < str.length; i++) {
+        if (str[i] === ' ') {
+            count++;
+        } else {
+            break;
+        }
+    }
+    return count;
 }
 
+function handleLineEnumerate(lines, linePosition){
+    let result = "";
+    const previusLine = lines[linePosition-1] || "";
+    const currentLine = lines[linePosition];
+    if(countIndentation(previusLine)===countIndentation(currentLine)){
+        if(!isLineEnumerate(previusLine)) result += "<ol> \n "   
+    }
+    else if(countIndentation(previusLine) < countIndentation(currentLine)) 
+        result += "<ol> \n ";
+    return result + `<li> ${currentLine} </li>`;
+    
+}
 
-function handleReadNextLine(currentLine, ident){
-    if(isLineEnumerate(currentLine)) return handleLineEnumerate(currentLine, ident);
-    if(isLineHeader(currentLine)) return(handleLineHeader(currentLine));
-    return handleParagraphLine(currentLine);
+function handleFinishPreviusLine(lines, linePosition){
+    if (linePosition==0) return "";
+    const previusLine = lines[linePosition-1];
+    const currentLine = lines[linePosition];
+    if(countIndentation(previusLine)<countIndentation(currentLine)) return "";
+    if (isLineEnumerate(previusLine)&& !isLineEnumerate(currentLine)) return "</ol>\n";
+    if (isLineEnumerate(previusLine)){
+        let result = ""
+        for(let i=countIndentation(previusLine)-countIndentation(currentLine); i>0; i--) result +="</ol>\n";
+        return result;
+    }
+    return "";
+}
+
+function handleReadNextLine(lines, linePosition){
+    const currentLine = lines[linePosition];
+    result = "";
+    result += handleFinishPreviusLine(lines, linePosition);
+    if(isLineEnumerate(currentLine)) result += handleLineEnumerate(lines, linePosition);
+    else if(isLineHeader(currentLine)) result += (handleLineHeader(currentLine));
+    else result += handleParagraphLine(currentLine);
+    return result;
 
 }
 
 function handleReadFile(lines){
-    let result = ""
-    while(lines.length>0){
-        currentLine = lines.shift();
-        result += handleReadNextLine(currentLine, 0)
+    let result = "";
+    for(let linePosition = 0; linePosition < lines.length; linePosition++){
+        result += handleReadNextLine(lines, linePosition)
         result += "\n";
     }
     fs.writeFile('result.html', result, (err) => {
@@ -63,7 +104,7 @@ function writeNewLabel(text, identacion, label){
 }
 
 function main(){
-    const filePath = './headerText.md';
+    const filePath = './test2.md';
     const lines = importFile(filePath);
     handleReadFile(lines);
 }

@@ -20,6 +20,8 @@ El Bosque Encantado resultó ser más misterioso de lo que imaginaba. Me perdí 
 ### Descubrimientos:
 1. Un arroyo cristalino.
 2. Ruinas de una antigua civilización.
+    1. Subtexto
+    2. Subtexto de nuevo
 3. Un mapa misterioso.
 
 *¿Qué secretos oculta este bosque?*
