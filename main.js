@@ -11,8 +11,11 @@ function removeIndentation(str) {
 
 function isLineEnumerate(line){
     const filteredLine = removeIndentation(line)
-    if(isNumeric(filteredLine[0]) && filteredLine.substring(1, 3) === ". ") return true;
-    return false;
+    return /^\d+\.\s/.test(filteredLine);
+}
+
+function removeNumberAndDot(str) {
+    return str.replace(/^\s*\d+\.\s*/, '');
 }
 
 function isLineHeader(line){
@@ -36,6 +39,10 @@ function handleParagraphLine(line){
     return `<p> ${line} </p>`
 }
 
+function wholeDivision(a, b) {
+    return Math.floor(a / b);
+}
+
 function countIndentation(str) {
     let count = 0;
     for (let i = 0; i < str.length; i++) {
@@ -57,7 +64,7 @@ function handleLineEnumerate(lines, linePosition){
     }
     else if(countIndentation(previusLine) < countIndentation(currentLine)) 
         result += "<ol> \n ";
-    return result + `<li> ${currentLine} </li>`;
+    return result + `<li> ${removeNumberAndDot(currentLine)} </li>`;
     
 }
 
@@ -69,7 +76,7 @@ function handleFinishPreviusLine(lines, linePosition){
     if (isLineEnumerate(previusLine)&& !isLineEnumerate(currentLine)) return "</ol>\n";
     if (isLineEnumerate(previusLine)){
         let result = ""
-        for(let i=countIndentation(previusLine)-countIndentation(currentLine); i>0; i--) result +="</ol>\n";
+        for(let i=(wholeDivision(countIndentation(previusLine)-countIndentation(currentLine),4)); i>0; i--) result +="</ol>\n";
         return result;
     }
     return "";
