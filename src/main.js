@@ -1,4 +1,4 @@
-const importFile = require('./importFile.js');
+const importFile = require('./utils/importFile.js');
 const fs = require('fs');
 
 function isNumeric(str) {
@@ -55,10 +55,7 @@ function countIndentation(str) {
     return count;
 }
 
-function handleLineEnumerate(lines, linePosition){
-    let result = "";
-    const previusLine = lines[linePosition-1] || "";
-    const currentLine = lines[linePosition];
+function handleLineEnumerate(previusLine, currentLine){
     if(countIndentation(previusLine)===countIndentation(currentLine)){
         if(!isLineEnumerate(previusLine)) result += "<ol> \n "   
     }
@@ -68,10 +65,7 @@ function handleLineEnumerate(lines, linePosition){
     
 }
 
-function handleFinishPreviusLine(lines, linePosition){
-    if (linePosition==0) return "";
-    const previusLine = lines[linePosition-1];
-    const currentLine = lines[linePosition];
+function handleFinishPreviusLine(previusLine, currentLine){
     if(countIndentation(previusLine)<countIndentation(currentLine)) return "";
     if (isLineEnumerate(previusLine)&& !isLineEnumerate(currentLine)) return "</ol>\n";
     if (isLineEnumerate(previusLine)){
@@ -93,6 +87,21 @@ function handleReadNextLine(lines, linePosition){
 
 }
 
+function handleReadNextLineRefactor(previusLine, currentLine){
+    let lineTranslation = "";
+    lineTranslation += handleFinishPreviusLine(previusLine, currentLine)
+    if (isLineEnumerate(currentLine)) {
+        lineTranslation += handleLineEnumerate(previusLine, currentLine);
+    }
+    else if(isLineHeader(currentLine)) {
+        lineTranslation += handleLineHeader(currentLine);
+    }
+    else {
+        lineTranslation += handleParagraphLine(currentLine);
+    }
+    return lineTranslation;
+}
+
 function handleReadFile(lines){
     let result = "";
     for(let linePosition = 0; linePosition < lines.length; linePosition++){
@@ -107,13 +116,40 @@ function handleReadFile(lines){
 
 function writeNewLabel(text, identacion, label){
 
-    
+    // [first, ...rest] = 
+}
+
+function handleReadFileRefactor(lines, translation){
+    const [previusLine, currentLine, ...rest] = lines;  // rest no mantiene el current para ddespues usarlo como previous
+    // result += handleReadNextLineRefactor("", previusLine);
+    // console.log(currentLine); // Current line no guarda nada
+    if (currentLine !== undefined){
+        translation += handleReadNextLineRefactor(previusLine, currentLine);
+        translation += "\n";
+        // console.log(`t: ${translation}`);
+        translation = handleReadFileRefactor(rest, translation);
+    }
+    return translation;
+
+
+
+
+
 }
 
 function main(){
-    const filePath = './test2.md';
+    const filePath = '../tests/easyTest.md';
     const lines = importFile(filePath);
-    handleReadFile(lines);
+    // handleReadFile(lines);
+    let translation = handleReadNextLineRefactor("", lines[0]);
+    translation += "\n";
+
+    translation += handleReadFileRefactor(lines, translation);
+
+    fs.writeFile('result.html', translation, (err) => {
+        if (err) throw err;
+        console.log('El archivo ha sido guardado correctamente.');
+    });
 }
 
 main()
