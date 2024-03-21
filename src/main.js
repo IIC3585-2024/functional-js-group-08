@@ -102,17 +102,17 @@ function handleReadNextLineRefactor(previusLine, currentLine){
     return lineTranslation;
 }
 
-function handleReadFile(lines){
-    let result = "";
-    for(let linePosition = 0; linePosition < lines.length; linePosition++){
-        result += handleReadNextLine(lines, linePosition)
-        result += "\n";
-    }
-    fs.writeFile('result.html', result, (err) => {
-        if (err) throw err;
-        console.log('El archivo ha sido guardado correctamente.');
-    });
-}
+// function handleReadFile(lines){
+//     let result = "";
+//     for(let linePosition = 0; linePosition < lines.length; linePosition++){
+//         result += handleReadNextLine(lines, linePosition)
+//         result += "\n";
+//     }
+//     fs.writeFile('result.html', result, (err) => {
+//         if (err) throw err;
+//         console.log('El archivo ha sido guardado correctamente.');
+//     });
+// }
 
 function writeNewLabel(text, identacion, label){
 
@@ -120,14 +120,14 @@ function writeNewLabel(text, identacion, label){
 }
 
 function handleReadFileRefactor(lines, translation){
-    const [previusLine, currentLine, ...rest] = lines;  // rest no mantiene el current para ddespues usarlo como previous
+    const [previusLine, currentLine, ...rest] = lines;  // rest no mantiene el current para despues usarlo como previous
     // result += handleReadNextLineRefactor("", previusLine);
     // console.log(currentLine); // Current line no guarda nada
     if (currentLine !== undefined){
         translation += handleReadNextLineRefactor(previusLine, currentLine);
         translation += "\n";
-        // console.log(`t: ${translation}`);
-        translation = handleReadFileRefactor(rest, translation);
+        console.log(`t: ${translation}`);
+        translation = handleReadFileRefactor([currentLine, ...rest], translation);
     }
     return translation;
 
