@@ -23,13 +23,13 @@ function isEnumerate(line){
   }
 
 function handleEnumerate(previousLine, currentLine){
-  if(countIndentation(previousLine)===countIndentation(currentLine)){
-      if(!isEnumerate(previousLine)) result += "<ol> \n "   
-  }
-  else if(countIndentation(previousLine) < countIndentation(currentLine)) 
-      result += "<ol> \n ";
+  let result = "";
+  if (countIndentation(previousLine) === countIndentation(currentLine)) {
+      if (!isEnumerate(previousLine)) result += "<ol> \n "
+  } else if (countIndentation(previousLine) < countIndentation(currentLine)) 
+    result += "<ol> \n ";
+
   return result + `<li> ${removeNumberAndDot(currentLine)} </li>`;
-    
 }
 
 function isParagraph(line){
@@ -38,8 +38,8 @@ function isParagraph(line){
 }
 
 function handleParagraph(line){
-    return `<p> ${line} </p>`
-  }
+  return `<p> ${line} </p>`
+}
 
 module.exports = {
     isHeader,

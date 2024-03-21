@@ -5,7 +5,7 @@ const {isHeader,
     handleEnumerate,
     isParagraph,
     handleParagraph } = require('./markdownElements');
-const { countIndentation } = require('./utils/utils');
+const { countIndentation, wholeDivision } = require('./utils/utils');
 
 function handleFirstLine(lines){
     return handleMarkdown("", lines[0]);
@@ -20,7 +20,6 @@ function handleReadFile(lines, translation){
   return translation;
 }
 
-
 function handleMarkdown(previousLine, currentLine){
   let translation = "";
   translation += handleFinishPreviousLine(previousLine, currentLine)
@@ -33,9 +32,9 @@ function handleMarkdown(previousLine, currentLine){
   else if (isParagraph(currentLine)){
       translation += handleParagraph(currentLine);
   }
-  
+  // handleTextStyle by Vini
   translation += "\n";
-  
+
   return translation;
 }
 
@@ -50,7 +49,6 @@ function handleFinishPreviousLine(previousLine, currentLine){
   }
   return "";
 }
-
 
 function writeTranslationInHTML(translation){
   fs.writeFile('result.html', translation, (err) => {
