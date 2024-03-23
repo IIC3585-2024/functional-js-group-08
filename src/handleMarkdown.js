@@ -7,6 +7,10 @@ const {
   isParagraph,
   handleParagraph,
   handleTextStyle,
+  isList,
+  handleList,
+  handleFinishEnumerate,
+  handleFinishList,
 } = require("./markdownElements");
 const { countIndentation, wholeDivision } = require("./utils/utils");
 
@@ -24,13 +28,27 @@ function handleReadFile(lines, translation) {
   return translation;
 }
 
+function isHorizontalRule(previousLine, currentLine) {
+  currentLine = currentLine.trim();
+  return /^(?:-+|\*+|_+)\s*$/.test(currentLine) && !previousLine.trim();
+}
+
+function handlehorizontalRule(){
+  return "<hr>";
+
+}
+
 function handleMarkdown(previousLine, currentLine) {
   let translation = "";
   translation += handleFinishPreviousLine(previousLine, currentLine);
   if (isEnumerate(currentLine)) {
     translation += handleEnumerate(previousLine, currentLine);
+  } else if (isList(currentLine)) {
+    translation += handleList(previousLine, currentLine);
   } else if (isHeader(currentLine)) {
     translation += handleHeader(currentLine);
+  } else if(isHorizontalRule(previousLine, currentLine)){
+    translation += handlehorizontalRule();
   } else if (isParagraph(currentLine)) {
     translation += handleParagraph(currentLine);
   }
@@ -43,12 +61,8 @@ function handleFinishPreviousLine(previousLine, currentLine) {
   const previousIdentation = countIndentation(previousLine);
   const currentIdentation = countIndentation(currentLine);
   if (previousIdentation < currentIdentation) return "";
-  if (isEnumerate(previousLine)) {
-    if (!isEnumerate(currentLine)) return "</ol>\n";
-    return "</ol>\n".repeat(
-      wholeDivision(previousIdentation - currentIdentation, 4)
-    );
-  }
+  if (isEnumerate(previousLine)) return handleFinishEnumerate(previousLine, currentLine);
+  if(isList(previousLine)) return handleFinishList(previousLine, currentLine);
   return "";
 }
 

@@ -6,6 +6,10 @@ function removeNumberAndDot(str) {
   return str.replace(/^\s*\d+\.\s*/, '');
 }
 
+function removeFirstHyphen(str) {
+  return str.replace(/-/, '');
+}
+
 function wholeDivision(a, b) {
   return Math.floor(a / b);
 };
@@ -19,5 +23,6 @@ module.exports = {
     removeNumberAndDot,
     removeIndentation,
     wholeDivision,
-    countIndentation
+    countIndentation,
+    removeFirstHyphen
 }

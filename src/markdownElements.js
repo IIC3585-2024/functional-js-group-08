@@ -2,6 +2,8 @@ const {
   countIndentation,
   removeIndentation,
   removeNumberAndDot,
+  removeFirstHyphen,
+  wholeDivision,
 } = require("./utils/utils");
 
 function isHeader(line) {
@@ -29,14 +31,44 @@ function isEnumerate(line) {
   return /^\d+\.\s/.test(filteredLine);
 }
 
-function handleEnumerate(previousLine, currentLine) {
+function isList(line) {
+  const filteredLine = removeIndentation(line);
+  return /^-\s/.test(filteredLine);
+}
+
+function handleAnyList(previousLine, currentLine, isFunction, markdownText, formattingFunction) {
   let result = "";
   if (countIndentation(previousLine) === countIndentation(currentLine)) {
-    if (!isEnumerate(previousLine)) result += "<ol> \n ";
+    if (!isFunction(previousLine)) result += `${markdownText}\n`;
   } else if (countIndentation(previousLine) < countIndentation(currentLine))
-    result += "<ol> \n ";
+    result += `${markdownText}\n`;
+  return result + `<li> ${formattingFunction(currentLine)} </li>`;
+}
 
-  return result + `<li> ${removeNumberAndDot(currentLine)} </li>`;
+function handleList(previousLine, currentLine) {
+  return handleAnyList(previousLine, currentLine, isList, "<ul>", removeFirstHyphen);
+}
+
+function handleEnumerate(previousLine, currentLine) {
+  return handleAnyList(previousLine, currentLine, isEnumerate, "<ol>", removeNumberAndDot);
+}
+
+function handlefinishAnyList(previousLine, currentLine, isFunction, markdownText) {
+  if (isFunction(previousLine)) {
+    if (!isFunction(currentLine)) return `${markdownText}\n`;
+    return `${markdownText}\n`.repeat(
+      wholeDivision(countIndentation(previousLine) - countIndentation(currentLine), 4)
+    );
+  }
+  return "";
+}
+
+function handleFinishEnumerate(previousLine, currentLine) {
+  return handlefinishAnyList(previousLine, currentLine, isEnumerate, "</ol>");
+}
+
+function handleFinishList(previousLine, currentLine) {
+  return handlefinishAnyList(previousLine, currentLine, isList, "</ul>");
 }
 
 function isParagraph(line) {
@@ -60,7 +92,12 @@ module.exports = {
   handleHeader,
   isEnumerate,
   handleEnumerate,
+  isList,
+  handleList,
   isParagraph,
   handleParagraph,
   handleTextStyle,
+  handleFinishEnumerate,
+  handleFinishList,
+
 };
