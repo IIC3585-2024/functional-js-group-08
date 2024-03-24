@@ -107,12 +107,6 @@ function handleLinks(translation) {
   });
 }
 
-function handleLineBreaks(translation) {
-  return translation.replace(/ {2}\n/g, '<br>\n');
-}
-
-
-
 module.exports = {
   isHeader,
   handleHeader,
@@ -128,5 +122,4 @@ module.exports = {
   isHorizontalRule,
   handlehorizontalRule,
   handleLinks,
-  handleLineBreaks
 };
