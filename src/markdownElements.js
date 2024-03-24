@@ -4,12 +4,13 @@ const {
   removeNumberAndDot,
   removeFirstHyphen,
   wholeDivision,
+  countGreaterThan,
 } = require("./utils/utils");
 
 function isHeader(line) {
   if (line[0] !== "#") return false;
   for (let i = 0; i < line.length; i++) {
-    if (line[i] === " ") return true;
+    if (line[i] === " ") return true; // por que el header revisa las siguientes
     if (line[i] != "#") return false;
   }
   return false;
@@ -63,6 +64,15 @@ function handleOrderedList(previousLine, currentLine) {
   return handleAnyList(previousLine, currentLine, isOrderedList, "<ol>", removeNumberAndDot);
 }
 
+function handleFinishList(previousLine, currentLine){
+  const previousIdentation = countIndentation(previousLine);
+  const currentIdentation = countIndentation(currentLine);
+  if (previousIdentation < currentIdentation) return "";
+  if (isOrderedList(previousLine)) return handleFinishOrderedList(previousLine, currentLine);
+  if(isUnorderedList(previousLine)) return handleFinishUnorderdList(previousLine, currentLine);
+  return "";
+}
+
 function handlefinishAnyList(previousLine, currentLine, isFunction, markdownText) {
   if (isFunction(previousLine)) {
     if (!isFunction(currentLine)) return `${markdownText}\n`;
@@ -77,8 +87,28 @@ function handleFinishOrderedList(previousLine, currentLine) {
   return handlefinishAnyList(previousLine, currentLine, isOrderedList, "</ol>");
 }
 
-function handleFinishList(previousLine, currentLine) {
+function handleFinishUnorderdList(previousLine, currentLine) {
   return handlefinishAnyList(previousLine, currentLine, isUnorderedList, "</ul>");
+}
+
+function isBlockQuote(line) {
+  return line.trim()[0] === ">";
+}
+
+function handleFinishBlockQuotes(previousLine, currentLine){
+  if (countGreaterThan(previousLine) <= countGreaterThan(currentLine)) return "";
+  else{
+    return "</blockquote>\n".repeat(countGreaterThan(previousLine) - countGreaterThan(currentLine));
+  }
+}
+
+function handleBlockQuote(previousLine, currentLine){
+  let result = "";
+  if (countGreaterThan(previousLine) < countGreaterThan(currentLine)){
+    result += "<blockquote>\n".repeat(countGreaterThan(currentLine) - countGreaterThan(previousLine));
+  }
+
+  return result;
 }
 
 function isParagraph(line) {
@@ -122,4 +152,7 @@ module.exports = {
   isHorizontalRule,
   handlehorizontalRule,
   handleLinks,
+  isBlockQuote,
+  handleBlockQuote,
+  handleFinishBlockQuotes
 };

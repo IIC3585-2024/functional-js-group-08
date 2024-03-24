@@ -14,11 +14,18 @@ const {
   isHorizontalRule,
   handlehorizontalRule,
   handleLinks,
+  isBlockQuote,
+  handleBlockQuote,
+  handleFinishBlockQuotes
 } = require("./markdownElements");
-const { countIndentation } = require("./utils/utils");
+const { countIndentation, removeGreaterThan, countGreaterThan } = require("./utils/utils");
 
 function handleFirstLine(lines) {
-  return handleMarkdown("", lines[0]);
+  return addCss() + handleMarkdown("", lines[0]);
+}
+
+function addCss(){
+  return `<link rel="stylesheet" href="style.css">\n`;
 }
 
 function handleReadFile(lines, translation) {
@@ -35,6 +42,11 @@ function handleReadFile(lines, translation) {
 function handleMarkdown(previousLine, currentLine) {
   let translation = "";
   translation += handleFinishPreviousLine(previousLine, currentLine);
+  if (isBlockQuote(currentLine)){
+    translation += handleBlockQuote(previousLine, currentLine);
+  }
+  previousLine = removeGreaterThan(previousLine);
+  currentLine = removeGreaterThan(currentLine);
   if (isOrderedList(currentLine)) {
     translation += handleOrderedList(previousLine, currentLine);
   } else if (isUnorderedList(currentLine)) {
@@ -47,18 +59,17 @@ function handleMarkdown(previousLine, currentLine) {
     translation += handleParagraph(currentLine);
   }
   translation += "\n";
-
   return translation;
 }
 
+
 function handleFinishPreviousLine(previousLine, currentLine) {
-  const previousIdentation = countIndentation(previousLine);
-  const currentIdentation = countIndentation(currentLine);
-  if (previousIdentation < currentIdentation) return "";
-  if (isOrderedList(previousLine)) return handleFinishOrderedList(previousLine, currentLine);
-  if(isUnorderedList(previousLine)) return handleFinishList(previousLine, currentLine);
-  return "";
+  let result = "";
+  result += handleFinishList(removeGreaterThan(previousLine), removeGreaterThan(currentLine));
+  result += handleFinishBlockQuotes(previousLine, currentLine);
+  return result;
 }
+
 
 function writeTranslationInHTML(translation) {
   fs.writeFile("result.html", translation, (err) => {
