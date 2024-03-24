@@ -123,7 +123,7 @@ function handleParagraph(line) {
 function handleTextStyle(translation) {
   translation = translation.replace(/(\*\*|__)(.*?)\1/g, "<strong>$2</strong>");
   translation = translation.replace(/(\*|_)(.*?)\1/g, "<em>$2</em>");
-
+  translation = translation.replace(/`([^`]+)`/g, "<code>$1</code>");
   return translation;
 }
 
