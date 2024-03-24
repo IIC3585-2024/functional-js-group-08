@@ -2,17 +2,20 @@ const fs = require("fs");
 const {
   isHeader,
   handleHeader,
-  isEnumerate,
-  handleEnumerate,
+  isOrderedList,
+  handleOrderedList,
   isParagraph,
   handleParagraph,
   handleTextStyle,
-  isList,
-  handleList,
-  handleFinishEnumerate,
+  isUnorderedList,
+  handleUnorderedList,
+  handleFinishOrderedList,
   handleFinishList,
+  isHorizontalRule,
+  handlehorizontalRule,
+  handleLinks,
 } = require("./markdownElements");
-const { countIndentation, wholeDivision } = require("./utils/utils");
+const { countIndentation } = require("./utils/utils");
 
 function handleFirstLine(lines) {
   return handleMarkdown("", lines[0]);
@@ -25,26 +28,17 @@ function handleReadFile(lines, translation) {
     translation = handleReadFile([currentLine, ...rest], translation);
   }
   translation = handleTextStyle(translation);
+  translation = handleLinks(translation);
   return translation;
-}
-
-function isHorizontalRule(previousLine, currentLine) {
-  currentLine = currentLine.trim();
-  return /^(?:-+|\*+|_+)\s*$/.test(currentLine) && !previousLine.trim();
-}
-
-function handlehorizontalRule(){
-  return "<hr>";
-
 }
 
 function handleMarkdown(previousLine, currentLine) {
   let translation = "";
   translation += handleFinishPreviousLine(previousLine, currentLine);
-  if (isEnumerate(currentLine)) {
-    translation += handleEnumerate(previousLine, currentLine);
-  } else if (isList(currentLine)) {
-    translation += handleList(previousLine, currentLine);
+  if (isOrderedList(currentLine)) {
+    translation += handleOrderedList(previousLine, currentLine);
+  } else if (isUnorderedList(currentLine)) {
+    translation += handleUnorderedList(previousLine, currentLine);
   } else if (isHeader(currentLine)) {
     translation += handleHeader(currentLine);
   } else if(isHorizontalRule(previousLine, currentLine)){
@@ -61,8 +55,8 @@ function handleFinishPreviousLine(previousLine, currentLine) {
   const previousIdentation = countIndentation(previousLine);
   const currentIdentation = countIndentation(currentLine);
   if (previousIdentation < currentIdentation) return "";
-  if (isEnumerate(previousLine)) return handleFinishEnumerate(previousLine, currentLine);
-  if(isList(previousLine)) return handleFinishList(previousLine, currentLine);
+  if (isOrderedList(previousLine)) return handleFinishOrderedList(previousLine, currentLine);
+  if(isUnorderedList(previousLine)) return handleFinishList(previousLine, currentLine);
   return "";
 }
 

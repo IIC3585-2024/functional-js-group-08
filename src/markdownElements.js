@@ -26,12 +26,22 @@ function handleHeader(line) {
   )} </h${hashtagCount}>`;
 }
 
-function isEnumerate(line) {
+function isHorizontalRule(previousLine, currentLine) {
+  currentLine = currentLine.trim();
+  return /^(?:-+|\*+|_+)\s*$/.test(currentLine) && !previousLine.trim();
+}
+
+function handlehorizontalRule(){
+  return "<hr>";
+
+}
+
+function isOrderedList(line) {
   const filteredLine = removeIndentation(line);
   return /^\d+\.\s/.test(filteredLine);
 }
 
-function isList(line) {
+function isUnorderedList(line) {
   const filteredLine = removeIndentation(line);
   return /^-\s/.test(filteredLine);
 }
@@ -45,12 +55,12 @@ function handleAnyList(previousLine, currentLine, isFunction, markdownText, form
   return result + `<li> ${formattingFunction(currentLine)} </li>`;
 }
 
-function handleList(previousLine, currentLine) {
-  return handleAnyList(previousLine, currentLine, isList, "<ul>", removeFirstHyphen);
+function handleUnorderedList(previousLine, currentLine) {
+  return handleAnyList(previousLine, currentLine, isUnorderedList, "<ul>", removeFirstHyphen);
 }
 
-function handleEnumerate(previousLine, currentLine) {
-  return handleAnyList(previousLine, currentLine, isEnumerate, "<ol>", removeNumberAndDot);
+function handleOrderedList(previousLine, currentLine) {
+  return handleAnyList(previousLine, currentLine, isOrderedList, "<ol>", removeNumberAndDot);
 }
 
 function handlefinishAnyList(previousLine, currentLine, isFunction, markdownText) {
@@ -63,12 +73,12 @@ function handlefinishAnyList(previousLine, currentLine, isFunction, markdownText
   return "";
 }
 
-function handleFinishEnumerate(previousLine, currentLine) {
-  return handlefinishAnyList(previousLine, currentLine, isEnumerate, "</ol>");
+function handleFinishOrderedList(previousLine, currentLine) {
+  return handlefinishAnyList(previousLine, currentLine, isOrderedList, "</ol>");
 }
 
 function handleFinishList(previousLine, currentLine) {
-  return handlefinishAnyList(previousLine, currentLine, isList, "</ul>");
+  return handlefinishAnyList(previousLine, currentLine, isUnorderedList, "</ul>");
 }
 
 function isParagraph(line) {
@@ -80,24 +90,43 @@ function handleParagraph(line) {
   return `<p> ${line} </p>`;
 }
 
-function handleTextStyle(text) {
-  text = text.replace(/(\*\*|__)(.*?)\1/g, "<strong>$2</strong>");
-  text = text.replace(/(\*|_)(.*?)\1/g, "<em>$2</em>");
+function handleTextStyle(translation) {
+  translation = translation.replace(/(\*\*|__)(.*?)\1/g, "<strong>$2</strong>");
+  translation = translation.replace(/(\*|_)(.*?)\1/g, "<em>$2</em>");
 
-  return text;
+  return translation;
 }
+
+function handleLinks(translation) {
+  const regex = /!?\[([^\]]+)\]\(([^\)]+)\)/g;
+  return translation.replace(regex, (match, altText, url) => {
+      if (match.startsWith('!')) {
+          return `<img src="${url}" alt="${altText}">`;
+      }
+      return `<a href="${url}">${altText}</a>`;
+  });
+}
+
+function handleLineBreaks(translation) {
+  return translation.replace(/ {2}\n/g, '<br>\n');
+}
+
+
 
 module.exports = {
   isHeader,
   handleHeader,
-  isEnumerate,
-  handleEnumerate,
-  isList,
-  handleList,
+  isOrderedList,
+  handleOrderedList,
+  isUnorderedList,
+  handleUnorderedList,
   isParagraph,
   handleParagraph,
   handleTextStyle,
-  handleFinishEnumerate,
+  handleFinishOrderedList,
   handleFinishList,
-
+  isHorizontalRule,
+  handlehorizontalRule,
+  handleLinks,
+  handleLineBreaks
 };
