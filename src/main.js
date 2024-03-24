@@ -6,7 +6,7 @@ const {
 } = require("./handleMarkdown");
 
 function main() {
-  const filePath = "../tests/test2.md";
+  const filePath = "../tests/test8.md";
   const lines = importFile(filePath);
   let translation = handleFirstLine(lines);
   translation = handleReadFile(lines, translation);
