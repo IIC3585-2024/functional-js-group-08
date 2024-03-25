@@ -16,7 +16,8 @@ const {
   handleLinks,
   isBlockQuote,
   handleBlockQuote,
-  handleFinishBlockQuotes
+  handleFinishBlockQuotes,
+  handleLineBreaks
 } = require("./markdownElements");
 const { countIndentation, removeGreaterThan, countGreaterThan } = require("./utils/utils");
 
@@ -58,6 +59,7 @@ function handleMarkdown(previousLine, currentLine) {
   } else if (isParagraph(currentLine)) {
     translation += handleParagraph(currentLine);
   }
+  translation = handleLineBreaks(translation, currentLine);
   translation += "\n";
   return translation;
 }

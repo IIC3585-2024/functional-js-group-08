@@ -11,7 +11,7 @@ function removeFirstHyphen(str) {
 }
 
 function removeGreaterThan(str) {
-  return str.trim().replace(/^>+/, "").trim();
+  return str.replace(/^>+/, "").replace(/^\s+/, '');
 }
 
 function wholeDivision(a, b) {
@@ -28,6 +28,11 @@ function countGreaterThan(str) {
   return firstNonGreaterThanIndex === -1 ? str.length : firstNonGreaterThanIndex;
 }
 
+function countHashtag(str) {
+  const firstNonHashtagIndex = str.split('').findIndex(char => char !== '#');
+  return firstNonHashtagIndex === -1 ? str.length : firstNonHashtagIndex;
+}
+
 
 module.exports = {
     removeNumberAndDot,
@@ -36,5 +41,6 @@ module.exports = {
     countIndentation,
     removeFirstHyphen,
     countGreaterThan,
-    removeGreaterThan
+    removeGreaterThan,
+    countHashtag
 }

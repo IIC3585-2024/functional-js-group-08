@@ -5,22 +5,15 @@ const {
   removeFirstHyphen,
   wholeDivision,
   countGreaterThan,
+  countHashtag
 } = require("./utils/utils");
 
 function isHeader(line) {
-  if (line[0] !== "#") return false;
-  for (let i = 0; i < line.length; i++) {
-    if (line[i] === " ") return true; // por que el header revisa las siguientes
-    if (line[i] != "#") return false;
-  }
-  return false;
+  return line.trim()[0] === "#";
 }
 
 function handleHeader(line) {
-  let hashtagCount = 1;
-  for (hashtagCount; hashtagCount < line.length; hashtagCount++) {
-    if (line[hashtagCount] != "#") break;
-  }
+  const hashtagCount = countHashtag(line);
   return `<h${hashtagCount}> ${line.substring(
     hashtagCount,
     line.length + 1
@@ -47,10 +40,10 @@ function isUnorderedList(line) {
   return /^-\s/.test(filteredLine);
 }
 
-function handleAnyList(previousLine, currentLine, isFunction, markdownText, formattingFunction) {
+function handleAnyList(previousLine, currentLine, isSameListType, markdownText, formattingFunction) {
   let result = "";
   if (countIndentation(previousLine) === countIndentation(currentLine)) {
-    if (!isFunction(previousLine)) result += `${markdownText}\n`;
+    if (!isSameListType(previousLine)) result += `${markdownText}\n`;
   } else if (countIndentation(previousLine) < countIndentation(currentLine))
     result += `${markdownText}\n`;
   return result + `<li> ${formattingFunction(currentLine)} </li>`;
@@ -137,6 +130,15 @@ function handleLinks(translation) {
   });
 }
 
+function handleLineBreaks(translation, currentLine){
+  // console.log(currentLine);
+  if (/\s{2}$/.test(currentLine)){
+    console.log("akel");
+    translation += "<br>";
+  }
+  return translation;
+}
+
 module.exports = {
   isHeader,
   handleHeader,
@@ -154,5 +156,6 @@ module.exports = {
   handleLinks,
   isBlockQuote,
   handleBlockQuote,
-  handleFinishBlockQuotes
+  handleFinishBlockQuotes,
+  handleLineBreaks
 };
