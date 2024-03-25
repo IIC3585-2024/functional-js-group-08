@@ -131,9 +131,7 @@ function handleLinks(translation) {
 }
 
 function handleLineBreaks(translation, currentLine){
-  // console.log(currentLine);
   if (/\s{2}$/.test(currentLine)){
-    console.log("akel");
     translation += "<br>";
   }
   return translation;

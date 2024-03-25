@@ -45,9 +45,12 @@ function handleMarkdown(previousLine, currentLine) {
   translation += handleFinishPreviousLine(previousLine, currentLine);
   if (isBlockQuote(currentLine)){
     translation += handleBlockQuote(previousLine, currentLine);
+    currentLine = removeGreaterThan(currentLine);
   }
-  previousLine = removeGreaterThan(previousLine);
-  currentLine = removeGreaterThan(currentLine);
+  if (isBlockQuote(previousLine)){
+    previousLine = removeGreaterThan(previousLine);
+  }
+  console.log(currentLine);
   if (isOrderedList(currentLine)) {
     translation += handleOrderedList(previousLine, currentLine);
   } else if (isUnorderedList(currentLine)) {

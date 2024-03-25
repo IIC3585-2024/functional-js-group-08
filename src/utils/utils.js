@@ -11,7 +11,8 @@ function removeFirstHyphen(str) {
 }
 
 function removeGreaterThan(str) {
-  return str.replace(/^>+/, "").replace(/^\s+/, '');
+  if (/^>+/.test(str)) return str.replace(/^>+/, "").replace(/^\s+/, '');
+  return str;
 }
 
 function wholeDivision(a, b) {
